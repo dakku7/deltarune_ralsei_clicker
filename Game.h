@@ -3,7 +3,6 @@
 #include "Player.h"
 #include "Animation.h"
 #include "Backup.h"
-#include "Button.h"
 #include "Menu.h"
 
 
@@ -63,4 +62,5 @@ public:
 	void centerLvl(sf::Text& level_text);
 
 	~Game();
+
 };
