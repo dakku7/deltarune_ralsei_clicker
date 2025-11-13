@@ -1,0 +1,14 @@
+﻿  Game.cpp
+D:\visualcode\clicker_ralsei\clicker_ralsei\Game.cpp(44,68): warning C4244: аргумент: преобразование "unsigned int" в "float", возможна потеря данных
+D:\visualcode\clicker_ralsei\clicker_ralsei\Game.cpp(49,46): warning C4244: аргумент: преобразование "int" в "T", возможна потеря данных
+D:\visualcode\clicker_ralsei\clicker_ralsei\Game.cpp(49,46): warning C4244:         with
+D:\visualcode\clicker_ralsei\clicker_ralsei\Game.cpp(49,46): warning C4244:         [
+D:\visualcode\clicker_ralsei\clicker_ralsei\Game.cpp(49,46): warning C4244:             T=float
+D:\visualcode\clicker_ralsei\clicker_ralsei\Game.cpp(49,46): warning C4244:         ]
+D:\visualcode\clicker_ralsei\clicker_ralsei\Game.cpp(161,36): warning C4244: аргумент: преобразование "unsigned int" в "float", возможна потеря данных
+D:\visualcode\clicker_ralsei\clicker_ralsei\Game.cpp(249,53): warning C4244: аргумент: преобразование "T" в "float", возможна потеря данных
+D:\visualcode\clicker_ralsei\clicker_ralsei\Game.cpp(249,53): warning C4244:         with
+D:\visualcode\clicker_ralsei\clicker_ralsei\Game.cpp(249,53): warning C4244:         [
+D:\visualcode\clicker_ralsei\clicker_ralsei\Game.cpp(249,53): warning C4244:             T=unsigned int
+D:\visualcode\clicker_ralsei\clicker_ralsei\Game.cpp(249,53): warning C4244:         ]
+  clicker_ralsei.vcxproj -> D:\visualcode\clicker_ralsei\x64\Debug\clicker_ralsei.exe
