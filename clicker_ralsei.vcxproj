@@ -138,21 +138,26 @@
   <ItemGroup>
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="Backup.cpp" />
-    <ClCompile Include="Button.cpp" />
     <ClCompile Include="LevelSys.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Menu.cpp" />
+    <ClCompile Include="mini_game.cpp" />
+    <ClCompile Include="Options.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Tree.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.h" />
     <ClInclude Include="Backup.h" />
-    <ClInclude Include="Button.h" />
+    <ClInclude Include="DialogueText.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="LevelSys.h" />
     <ClInclude Include="Menu.h" />
+    <ClInclude Include="mini_game.h" />
+    <ClInclude Include="Options.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Tree.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

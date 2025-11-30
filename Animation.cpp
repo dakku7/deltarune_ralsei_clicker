@@ -3,8 +3,8 @@
 
 Animation::Animation()
 	: timeIsActive(false), timeSparkle(false) {
-	 meow.openFromFile("Audio/meow.mp3");
-	 meow.setVolume(4.0f);
+	 meow.openFromFile("Audio/click.wav");
+	 meow.setVolume(100.0f);
 	 sparkle_texture.loadFromFile("Textures\\star.png");
 	 sparkle.setTexture(sparkle_texture);
 
@@ -24,6 +24,8 @@ Animation::Animation()
 	 sparkle.setScale(0.1,0.1);
 	 timeAnim = false;
 
+	 snd_levelup.openFromFile("Audio\\snd_ballchime.ogg");
+	 snd_levelup.setVolume(80.f);
 //	 light_texture.loadFromFile("Textures\\light.png");
 //	 light.setTexture(light_texture);
 //	 light.setScale(0.5, 0.5);
@@ -69,9 +71,12 @@ void Animation::startClicked(sf::Sprite& ralsei)
 
 
 
- void Animation::startLevelUp(int level)
+ void Animation::startLevelUp(int level, bool& secureClick)
  {
-
+	 if (!secureClick) {
+		 secureClick = true;
+	 }
+	 if (secureClick) snd_levelup.play();
 	 timeAnim = true;
 	 clock.restart();
 
@@ -89,9 +94,11 @@ void Animation::startClicked(sf::Sprite& ralsei)
 	 overlay.setFillColor(sf::Color(0, 0, 0, 0));
  }
 
- void Animation::updateLevelUp(sf::RenderWindow& window)
+ void Animation::updateLevelUp(sf::RenderWindow& window, bool& secureClick)
  {
 	 if (!timeAnim) return;
+
+	
 
 	 float t = clock.getElapsedTime().asSeconds() / duration;
 
@@ -115,8 +122,10 @@ void Animation::startClicked(sf::Sprite& ralsei)
 
 	if (clock.getElapsedTime().asSeconds() > 3) {
 		 timeAnim = false;
+		 secureClick = false;
 		 window.setMouseCursorVisible(true); // hide cursor
-		 sf::Mouse::setPosition(sf::Vector2i(400, 300), window); // reset position if needed
+		 sf::Mouse::setPosition(sf::Vector2i(400, 300), window); // reset position
+		 snd_levelup.stop();
 	 } 
  }
 
@@ -125,12 +134,12 @@ void Animation::startClicked(sf::Sprite& ralsei)
 	 if (!timeAnim)
 	 {
 		 window.setMouseCursorVisible(true); // hide cursor
-		 sf::Mouse::setPosition(sf::Vector2i(400, 300), window); // reset position if needed
+		 sf::Mouse::setPosition(sf::Vector2i(400, 300), window); // reset position 
 		 return;
 	 }
 	
 	 window.setMouseCursorVisible(false); // hide cursor
-	 sf::Mouse::setPosition(sf::Vector2i(0, 0), window); // reset position if needed
+	 sf::Mouse::setPosition(sf::Vector2i(0, 0), window); // reset position 
 	 overlay.setSize((sf::Vector2f)window.getSize());
 
 	 levelup.setPosition(window.getSize().x / 2.f, window.getSize().y / 2.f);

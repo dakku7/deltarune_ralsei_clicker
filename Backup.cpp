@@ -33,12 +33,13 @@ void Backup::loadupFiles(Player& player)
 
 	player.updateText(player.count_text, player.Get_clickCount());
 	player.updateText(player.level_text, player.level);
+	saveData.close();
 }
 
 void Backup::setTextures(Player& player, sf::Sprite& ralsei, sf::Sprite& background, sf::Texture& ralsei_tex, sf::Texture& background_tex, std::map<int, sf::Texture>& skins_tex_orig, std::map<int, sf::Texture>& skins_tex_button, sf::RectangleShape* skins, sf::Sprite& heartlvl, sf::Texture& heart_texture, sf::Sprite& heartEmpty, sf::Texture& heartEmpty_texture, sf::Text& menu_guide_text)
 {
-	ralsei_tex.loadFromFile("Textures\\rals.png");
-	background_tex.loadFromFile("Textures\\background.png");
+	ralsei_tex.loadFromFile("Textures\\ralss.png");
+	background_tex.loadFromFile("Textures\\Chapter1\\background.png");
 	heart_texture.loadFromFile("Textures\\heart.png");
 	heartEmpty_texture.loadFromFile("Textures\\heart_empty.png");
 	heartlvl.setTexture(heart_texture);
@@ -50,7 +51,7 @@ void Backup::setTextures(Player& player, sf::Sprite& ralsei, sf::Sprite& backgro
 	
 	for (int i = 1; i <= 3; ++i)
 	{
-		std::string origFile = "Textures\\rals" + std::to_string(i) + ".png";
+		std::string origFile = "Textures\\ralss" + std::to_string(i) + ".png";
 		std::string skinFile = "Textures\\skin" + std::to_string(i) + ".png";
 		std::string lockFile = "Textures\\skin" + std::to_string(i) + "lock.png";
 

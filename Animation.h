@@ -51,11 +51,11 @@ private:
 	float alphaMax = 255;        // максимальная прозрачность
 
 
-
+	sf::Music snd_levelup;
 public:
 	Animation();
-	void startLevelUp(int level);
-	void updateLevelUp(sf::RenderWindow& window);
+	void startLevelUp(int level, bool& secureClick);
+	void updateLevelUp(sf::RenderWindow& window, bool& secureClick);
 	void draw(sf::RenderWindow& window);
 //============================================================================
 	void idleAnimation(sf::Sprite& ralsei);

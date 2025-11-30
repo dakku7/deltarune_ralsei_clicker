@@ -1,7 +1,19 @@
 #include "Player.h"
 #include "Game.h"
 
-
+void Player::reset(std::map<int, sf::Texture>& skins_tex_orig, std::map<int, sf::Texture>& skins_tex_button, sf::RectangleShape* skins) {
+	 clickCount = 0;
+	 clickPower = 1;
+	 level = 0;
+	 ralseiSuitDino = false;
+	 ralseiSuitRock = false;
+	 ralseiSuitOff = false;
+	 currentSkinIndex = 0;
+	
+	 updateSkins(skins_tex_orig, skins_tex_button, skins);
+	 updateText(count_text, clickCount);
+	 updateText(level_text, level);
+}
 
 bool Player::click(sf::Sprite& ralsei, sf::RenderWindow& window, const sf::Event& event, sf::View main_view)
 {
@@ -23,26 +35,38 @@ bool Player::click(sf::Sprite& ralsei, sf::RenderWindow& window, const sf::Event
 
 
 
-bool Player::click(sf::Sprite& ralsei, sf::RectangleShape& button, sf::RenderWindow& window, const sf::Event& event,sf::View& main_view, int skinIndex, std::map<int, sf::Texture>& skinTexturesOrig)
+bool Player::click(sf::Sprite& ralsei, sf::RectangleShape& button, sf::RenderWindow& window, const sf::Event& event,sf::View& main_view, int skinIndex, std::map<int, sf::Texture>& skinTexturesOrig, int& i)
 {
 	if (event.mouseButton.button != sf::Mouse::Left) return false;
 
 	sf::Vector2i mousePos = sf::Mouse::getPosition(window);
 	sf::Vector2f translatedPos = window.mapPixelToCoords(mousePos, main_view);
 
-	if (button.getGlobalBounds().contains(translatedPos)) {
-		if (getRalseiSkinstatus(skinIndex)) {
-			currentSkinIndex = skinIndex;                 
-			ralsei.setTexture(skinTexturesOrig[skinIndex]); 
-//			std::cout << "Skin " << skinIndex << " is loaded up!\n";
-			return true;
-		}
-		else {
-//			std::cout << "Skin " << skinIndex << " is locked!\n";
-			return false;
-		}
-	}
-	return false;
+	if (!button.getGlobalBounds().contains(translatedPos)) return false;
+	if (!getRalseiSkinstatus(skinIndex)) return false;
+
+	// вычислим мировую координату "дна" (нижней границы) текущего спрайта с учЄтом масштаба
+	sf::FloatRect prevBounds = ralsei.getGlobalBounds();
+	float groundY = prevBounds.top + prevBounds.height;
+
+	// сохраним текущую X-позицию и масштаб
+	float posX = ralsei.getPosition().x;
+	sf::Vector2f scale = ralsei.getScale();
+
+	// установим новую текстуру и сбросим rect, чтобы не осталось "кусочков" старого rect
+	ralsei.setTexture(skinTexturesOrig[skinIndex], true);
+	const sf::Texture& newTex = skinTexturesOrig[skinIndex];
+
+	// установим origin по центру (как в setPositionRalsei) и поставим позицию так,
+	// чтобы нижн€€ граница оставалась на groundY
+	float newW = static_cast<float>(newTex.getSize().x);
+	float newH = static_cast<float>(newTex.getSize().y);
+
+	ralsei.setOrigin(newW / 2.f, newH / 2.f);
+	ralsei.setPosition(posX, groundY - (newH / 2.f) * scale.y);
+
+	currentSkinIndex = skinIndex;
+	return true;
 }
 
 
@@ -57,6 +81,15 @@ void Player::Add_clickCount(int data)
 	clickCount += data;
 }
 
+void Player::Add_clickCount(sf::Event& event)
+{
+	if (event.key.code == sf::Keyboard::C) {
+		int click_buf = 1 * clickPower;
+		clickCount += click_buf;
+		updateText(count_text, clickCount);
+	}
+}
+
 void Player::Set_clickCount(int data)
 {
 	clickCount = data;
@@ -66,7 +99,7 @@ void Player::updateText(sf::Text& count_text, int data)
 {
 	std::string ctr_buf;
 	ctr_buf = std::to_string(data);
-	std::cout << ctr_buf;
+	//std::cout << ctr_buf;
 	count_text.setString(ctr_buf);
 
 
@@ -206,8 +239,7 @@ bool Player::getRalseiSkinstatus(int skin_count)
 	{
 	case 0:
 		return false;
-	case 1:
-		
+	case 1:		
 		return ralseiSuitOff;
 	case 2:
 		return ralseiSuitDino;

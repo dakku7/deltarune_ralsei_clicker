@@ -4,15 +4,18 @@
 #include "Animation.h"
 #include "Backup.h"
 #include "Menu.h"
-
-
+#include "Tree.h"
+#include "mini_game.h"
+#include "AssetManeger.h"
 
 static const float VIEW_WIDTH = 800;
 static const float VIEW_HEIGHT = 600;
 
 class Game {
-public:
-
+private:
+	sf::Sprite center;
+	sf::Texture center_tex;
+	MiniGame game_ev;
 private:
 	//window and ralsei
 	sf::RenderWindow window;
@@ -36,6 +39,7 @@ private:
 	std::map<int, sf::Texture> skins_tex_orig;     
 	std::map<int, sf::Texture> skins_tex_button;
 	sf::RectangleShape skins[3];
+	
 
 	//heart(lvl objects)
 	sf::Sprite heartLvl;
@@ -47,6 +51,18 @@ private:
 	//menu
 	Menu menu_;
 	sf::Text menu_guide;
+	bool isKeyPressed = false;
+	bool levelUpState = false;
+	bool isFullscreen = false;
+	
+	Tree first_tree;
+	Tree second_tree;
+
+	//audio
+	sf::Music theme;
+	float ralseiGroundOffset = 0.f;
+
+	AssetManager assets;
 public:
 
 	Game();
@@ -60,7 +76,11 @@ public:
 	void ButtonHover(sf::RectangleShape* skins, int count, sf::RenderWindow& window);
 	void updateHeart(Player& player);
 	void centerLvl(sf::Text& level_text);
+	void applyIntegerScaling();
+
+	void drawFullScreen();
+
+	void initSprites();
 
 	~Game();
-
 };

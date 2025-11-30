@@ -1,11 +1,8 @@
 #include "Game.h"
 //#define DEBUG
 
-
-
-
 Game::Game()
-	: window(sf::VideoMode({ 800, 600 }), "CLICK"),
+	: window(sf::VideoMode({ 800, 600 }), "CLICK", sf::Style::Default),
 	main_view(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(VIEW_HEIGHT, VIEW_WIDTH))
 {
 #ifdef DEBUG
@@ -20,8 +17,23 @@ Game::Game()
 #endif // TEST
 
 	backup.setTextures(player, ralsei, background, ralsei_texture, background_tex, skins_tex_orig, skins_tex_button, skins, heartLvl, heart_texture, heartEmpty, heartEmpty_texture, menu_guide);
-	setPositionRalsei();
 	
+	
+	center_tex.loadFromFile("Textures\\chp1.png");
+	center.setTexture(center_tex);
+	center.setOrigin(
+		static_cast<float>(center_tex.getSize().x) / 2.f,
+		static_cast<float>(center_tex.getSize().y) / 2.f
+	);
+	center.setPosition(
+		static_cast<float>(window.getSize().x) / 2.f,
+		static_cast<float>(window.getSize().y) / 2.f
+	);
+	ralseiGroundOffset =200;
+	setPositionRalsei();
+	theme.openFromFile("Audio\\lantern.wav");
+	theme.setLoop(true);
+	theme.setVolume(20);
 }
 
 
@@ -33,6 +45,7 @@ bool Game::run()
 		backup.loadupFiles(player);
 	}
 	else return false;
+	theme.play();
 
 	sf::FloatRect heartBounds = heartEmpty.getLocalBounds();
 	heartEmpty.setOrigin(heartBounds.width / 2.f, heartBounds.height / 2.f);
@@ -42,6 +55,12 @@ bool Game::run()
 	centerLvl(player.level_text);
 	player.count_text.setPosition(400, 500);
 	menu_guide.setPosition(0 + 5, 600 - menu_guide.getCharacterSize() - 5);
+	first_tree.setTree(sf::Vector2f(185, 155));
+	second_tree.setTree(sf::Vector2f(800 - 185, 160-5));
+
+
+	auto size = window.getSize();
+	auto pos = window.getPosition();
 
 	for (int i = 0, j = 0; i < 3; ++i)
 	{
@@ -55,17 +74,19 @@ bool Game::run()
 	{
 		sf::Event event;
 		while (window.pollEvent(event)) {
+			if (game_ev.isOpen()) {
+				continue;
+			}
 
 			switch (event.type)
 			{
+
 			case sf::Event::Closed:
 				window.close();
 				break;
 			case sf::Event::Resized:
 				checkWindowSize();
-				setPositionRalsei();
-				ResizeView(window, main_view);
-			
+				applyIntegerScaling();
 				break;
 			case sf::Event::MouseButtonPressed:
 				if (player.click(ralsei, window, event, main_view)) {
@@ -73,14 +94,11 @@ bool Game::run()
 				}
 				
 				for (int i = 0; i < 3; i++) {
-					player.click(ralsei, skins[i], window, event, main_view, i + 1, skins_tex_orig);
+					player.click(ralsei, skins[i], window, event, main_view, i + 1, skins_tex_orig, i);
 				}
-#ifndef DEBUG
+#ifdef DEBUG
 				std::cout << "Booleans skins: off: " + std::to_string(player.getRalseiSkinstatus(1)) + ", dino: " + std::to_string(player.getRalseiSkinstatus(2)) + ", rock: " + std::to_string(player.getRalseiSkinstatus(3)) + '\n';
 #endif // !TEST
-				
-			
-
 				break;
 
 				break;
@@ -89,6 +107,12 @@ bool Game::run()
 					window.close();
 				}
 				
+				if (event.key.code == sf::Keyboard::C && !isKeyPressed && !levelUpState) {
+					isKeyPressed = true;
+					player.Add_clickCount(event);
+					anim.startClicked(ralsei);
+				}
+
 				if (event.key.code == sf::Keyboard::Z) {
 					menu_.draw(player, window);
 				}
@@ -99,20 +123,50 @@ bool Game::run()
 					player.updateText(player.count_text, player.Get_clickCount());
 				}
 
-				if (event.key.code == sf::Keyboard::Num9) {
+				if (event.key.code == sf::Keyboard::F1) {
+					player.reset(skins_tex_orig, skins_tex_button, skins);
+					backup.backupFiles(player);
 					ralsei.setTexture(ralsei_texture);
+					centerLvl(player.level_text);
+					setPositionRalsei();
+				}
+
+				if (event.key.code == sf::Keyboard::Num9) {
+					ralsei.setTexture(ralsei_texture);					
+					setPositionRalsei();
+				//	ralsei.setPosition(sf::Vector2f(ralsei.getPosition().x, ralsei.getGlobalBounds().top - 20));
+				}
+
+				if (event.key.code == sf::Keyboard::F2) {
+					game_ev.run();
+				}
+				
+				if (event.key.code == sf::Keyboard::Enter &&
+					(event.key.alt || sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)))
+				{
+					drawFullScreen();
+				}
+				
+				break;
+			case sf::Event::KeyReleased:
+				if (event.key.code == sf::Keyboard::C) {
+					isKeyPressed = false;
 				}
 				break;
 			default:
 				break;
 			}	
 		}	
+		if (game_ev.isOpen()) {
+			game_ev.update(event);
+		}
+
 		anim.updateModels(ralsei);
 		updateHeart(player);
 
 		if (player.countToLevelCheck()) {
 			player.levelCheck(player.level);
-			anim.startLevelUp(player.level);
+			anim.startLevelUp(player.level, levelUpState);
 			player.updateText(player.level_text, player.level);
 			player.updateSkins(skins_tex_orig, skins_tex_button, skins);
 			
@@ -121,13 +175,16 @@ bool Game::run()
 		
 		ButtonHover(skins, 3,window);
 		if (anim.timeAnim) {
-			anim.updateLevelUp(window);
+			anim.updateLevelUp(window, levelUpState);
 		}
 		anim.fogUpdate();
 		anim.sparkleSpawn();
 		anim.sparkleUpdate();
 		anim.lightSpawn();
 		anim.lightUpdate();
+		first_tree.anim();
+		second_tree.anim();
+
 		render();
 	}
 
@@ -136,19 +193,16 @@ bool Game::run()
 }
 
 
-
-
-
 void Game::render()
 {
 	background.setPosition(sf::Vector2f(0, 0));
-	
-	main_view.setCenter(ralsei.getPosition());
 
-
+	main_view.setCenter(center.getPosition());
 	window.clear();
 	window.draw(background);
 	window.setView(main_view);
+	first_tree.draw(window);
+	second_tree.draw(window);
 //	anim.fogDraw(window);
 //	anim.sparkeDraw(window);
 //	anim.lightDraw(window);
@@ -157,7 +211,7 @@ void Game::render()
 	window.draw(ralsei);
 	
 	ResizeView(window, main_view);
-	window.setView(window.getDefaultView());
+//window.setView(window.getDefaultView());
 	player.count_text.setPosition(400 - player.count_text.getCharacterSize(), 500);
 
 //obj
@@ -178,16 +232,31 @@ void Game::render()
 	if (anim.timeAnim) {
 		anim.draw(window);
 	}
+//	window.draw(center);
+
+	if (game_ev.isOpen()) {
+		game_ev.draw(window);
+	}
 	window.display();
 }
 
 void Game::setPositionRalsei()
 {
-	ralsei.setOrigin(ralsei_texture.getSize().x / 2.f, ralsei_texture.getSize().y / 2.f);
-	ralsei.setPosition(window.getSize().x / 2.f, window.getSize().y / 2.f);
+    // выставл€ем origin у текущей текстуры ralsei на bottom-center
+    if (ralsei.getTexture()) {
+        const sf::Texture* tex = ralsei.getTexture();
+        ralsei.setOrigin(static_cast<float>(tex->getSize().x) / 2.f, static_cast<float>(tex->getSize().y) );
+    }
+
+    // позици€ "дна" равна позиции center плюс дополнительный оффсет (если нужен)
+    sf::Vector2f centerPos = center.getPosition();
+    float groundY = centerPos.y + ralseiGroundOffset;
+
+    // позиционируем ralsei так, чтобы его нижн€€ точка оказалась на groundY
+    ralsei.setPosition(centerPos.x, groundY);
 }
 
-sf::Vector2f Game::GetRalseiPosition()
+sf::Vector2f Game::GetRalseiPosition() 
 {
 	return ralsei.getPosition();
 	 
@@ -226,7 +295,7 @@ void Game::ButtonHover(sf::RectangleShape* skins, int count, sf::RenderWindow& w
 		float y2 = y1 + skins[i].getSize().y;
 
 		if ((mousePos.x >= x1) && (mousePos.x <= x2) && (mousePos.y >= y1) && (mousePos.y <= y2)) {
-			skins[i].setFillColor(sf::Color(255, 255, 255, 200)); 
+			skins[i].setFillColor(sf::Color(255, 255, 255, 150)); 
 		}
 		else {
 			skins[i].setFillColor(sf::Color::White); 
@@ -259,7 +328,71 @@ void Game::centerLvl(sf::Text& level_text)
 	player.level_text.setPosition(heartEmpty.getPosition());
 }
 
+void Game::applyIntegerScaling()
+{
+	int screenW = window.getSize().x;
+	int screenH = window.getSize().y;
+
+	float scaleX = (float)screenW / 800;
+	float scaleY = (float)screenH / 600;
+
+	float finalScale = std::floor(std::min(scaleX, scaleY));
+
+	float finalWidth = 800 * finalScale;
+	float finalHeight = 600 * finalScale;
+
+	float offsetX = (screenW - finalWidth) / 2.f;
+	float offsetY = (screenH - finalHeight) / 2.f;
+
+	main_view.setViewport(sf::FloatRect(
+		offsetX / screenW,
+		offsetY / screenH,
+		finalWidth / screenW,
+		finalHeight / screenH
+	));
+}
+
+void Game::drawFullScreen()
+{
+	isFullscreen = !isFullscreen;
+
+	window.close();
+
+	if (isFullscreen)
+	{
+		
+		window.create(
+			sf::VideoMode::getDesktopMode(),
+			"CLICK",
+			sf::Style::None // !!! ключ !!
+		);
+	}
+	else
+	{
+		window.create(
+			sf::VideoMode(800, 600),
+			"CLICK",
+			sf::Style::Default
+		);
+	}
+
+	window.setFramerateLimit(60);
+
+	applyIntegerScaling();
+}
+
+void Game::initSprites()
+{
+	
+}
+
+void Game::loadTextures()
+{
+
+}
+
 
 Game::~Game()
 {
 }
+
