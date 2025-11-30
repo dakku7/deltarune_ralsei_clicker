@@ -3,8 +3,12 @@
 
 Game::Game()
 	: window(sf::VideoMode({ 800, 600 }), "CLICK", sf::Style::Default),
-	main_view(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(VIEW_HEIGHT, VIEW_WIDTH))
+	main_view(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(VIEW_HEIGHT, VIEW_WIDTH)),
+	butt_skin(TextureID::Ralsei_skin_1_frame, TextureID::Ralsei_skin_1_lighted, &assets)
 {
+
+	loadTextures();
+	initSprites();
 #ifdef DEBUG
 	std::cout << "Booleans skins: off: " + std::to_string(player.getRalseiSkinstatus(1)) + ", dino: " + std::to_string(player.getRalseiSkinstatus(2)) + ", rock: " + std::to_string(player.getRalseiSkinstatus(3)) + '\n';
 #endif // DEBUG
@@ -16,14 +20,14 @@ Game::Game()
 	std::cout << "Booleans skins: off: " + std::to_string(player.getRalseiSkinstatus(1)) + ", dino: " + std::to_string(player.getRalseiSkinstatus(2)) + ", rock: " + std::to_string(player.getRalseiSkinstatus(3)) + '\n';
 #endif // TEST
 
-	backup.setTextures(player, ralsei, background, ralsei_texture, background_tex, skins_tex_orig, skins_tex_button, skins, heartLvl, heart_texture, heartEmpty, heartEmpty_texture, menu_guide);
+	//backup.setTextures(player, ralsei, background, ralsei_texture, background_tex, skins_tex_orig, skins_tex_button, skins, heartLvl, heart_texture, heartEmpty, heartEmpty_texture, menu_guide);
 	
 	
-	center_tex.loadFromFile("Textures\\chp1.png");
-	center.setTexture(center_tex);
+
+
 	center.setOrigin(
-		static_cast<float>(center_tex.getSize().x) / 2.f,
-		static_cast<float>(center_tex.getSize().y) / 2.f
+		static_cast<float>(assets.getTexture(TextureID::center_tex).getSize().x) / 2.f,
+		static_cast<float>(assets.getTexture(TextureID::center_tex).getSize().y) / 2.f
 	);
 	center.setPosition(
 		static_cast<float>(window.getSize().x) / 2.f,
@@ -34,6 +38,16 @@ Game::Game()
 	theme.openFromFile("Audio\\lantern.wav");
 	theme.setLoop(true);
 	theme.setVolume(20);
+
+
+
+
+
+
+	//пока что для теста
+	sf::Vector2f f(VIEW_WIDTH - butt_skin.getSprite().getGlobalBounds().width, 0);
+	
+	butt_skin.setPosition(f);
 }
 
 
@@ -126,13 +140,13 @@ bool Game::run()
 				if (event.key.code == sf::Keyboard::F1) {
 					player.reset(skins_tex_orig, skins_tex_button, skins);
 					backup.backupFiles(player);
-					ralsei.setTexture(ralsei_texture);
+					ralsei.setTexture(assets.getTexture(TextureID::Ralsei_Main));
 					centerLvl(player.level_text);
 					setPositionRalsei();
 				}
 
 				if (event.key.code == sf::Keyboard::Num9) {
-					ralsei.setTexture(ralsei_texture);					
+					ralsei.setTexture(assets.getTexture(TextureID::Ralsei_Main));					
 					setPositionRalsei();
 				//	ralsei.setPosition(sf::Vector2f(ralsei.getPosition().x, ralsei.getGlobalBounds().top - 20));
 				}
@@ -177,6 +191,8 @@ bool Game::run()
 		if (anim.timeAnim) {
 			anim.updateLevelUp(window, levelUpState);
 		}
+		butt_skin.buttonHover(player, window);
+
 		anim.fogUpdate();
 		anim.sparkleSpawn();
 		anim.sparkleUpdate();
@@ -237,6 +253,8 @@ void Game::render()
 	if (game_ev.isOpen()) {
 		game_ev.draw(window);
 	}
+
+	window.draw(butt_skin.getSprite());
 	window.display();
 }
 
@@ -284,23 +302,7 @@ void Game::checkWindowSize()
 
 void Game::ButtonHover(sf::RectangleShape* skins, int count, sf::RenderWindow& window)
 {
-	for (int i = 0; i < count; i++)
-	{
-
-		sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-
-		float x1 = skins[i].getPosition().x;
-		float y1 = skins[i].getPosition().y;
-		float x2 = x1 + skins[i].getSize().x;
-		float y2 = y1 + skins[i].getSize().y;
-
-		if ((mousePos.x >= x1) && (mousePos.x <= x2) && (mousePos.y >= y1) && (mousePos.y <= y2)) {
-			skins[i].setFillColor(sf::Color(255, 255, 255, 150)); 
-		}
-		else {
-			skins[i].setFillColor(sf::Color::White); 
-		}
-	}
+	
 }
 
 void Game::updateHeart(Player& player)
@@ -316,7 +318,7 @@ void Game::updateHeart(Player& player)
 	
 	heartLvl.setTextureRect(fillRectangle);
 	heartLvl.setOrigin(textureSize.x / 2.f, textureSize.y); // точка привязки низ спрайта
-	heartLvl.setPosition(heartEmpty.getPosition().x, heartEmpty.getPosition().y + heartEmpty_texture.getSize().y / 2 + (heartEmpty_texture.getSize().y - filledHeight));
+	heartLvl.setPosition(heartEmpty.getPosition().x, heartEmpty.getPosition().y + assets.getTexture(TextureID::Heart_empty).getSize().y / 2 + (assets.getTexture(TextureID::Heart_empty).getSize().y - filledHeight));
 
 }
 
@@ -383,11 +385,31 @@ void Game::drawFullScreen()
 
 void Game::initSprites()
 {
-	
+	center.setTexture(assets.getTexture(TextureID::center_tex));
+	ralsei.setTexture(assets.getTexture(TextureID::Ralsei_Main));
+	background.setTexture(assets.getTexture(TextureID::Background));
+	heartLvl.setTexture(assets.getTexture(TextureID::Heart));
+	heartEmpty.setTexture(assets.getTexture(TextureID::Heart_empty));
+	butt_skin.initSprite();
 }
 
 void Game::loadTextures()
 {
+	assets.loadTexture(TextureID::Ralsei_Main);
+	assets.loadTexture(TextureID::Ralsei_skin_1);
+	assets.loadTexture(TextureID::Ralsei_skin_1_locked);
+	assets.loadTexture(TextureID::Ralsei_skin_1_frame);
+	assets.loadTexture(TextureID::Ralsei_skin_2);
+	assets.loadTexture(TextureID::Ralsei_skin_2_locked);
+	assets.loadTexture(TextureID::Ralsei_skin_2_frame);
+	assets.loadTexture(TextureID::Ralsei_skin_3);
+	assets.loadTexture(TextureID::Ralsei_skin_3_frame);
+	assets.loadTexture(TextureID::Ralsei_skin_3_locked);
+
+	assets.loadTexture(TextureID::Background);
+	assets.loadTexture(TextureID::Heart);
+	assets.loadTexture(TextureID::Heart_empty);
+	assets.loadTexture(TextureID::center_tex);
 
 }
 

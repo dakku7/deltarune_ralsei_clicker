@@ -139,6 +139,7 @@
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="AssetManeger.cpp" />
     <ClCompile Include="Backup.cpp" />
+    <ClCompile Include="Button.cpp" />
     <ClCompile Include="LevelSys.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Game.cpp" />
@@ -150,8 +151,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.h" />
-    <ClInclude Include="AssetManeger.h" />
+    <ClInclude Include="AssetManager.h" />
     <ClInclude Include="Backup.h" />
+    <ClInclude Include="Button.h" />
     <ClInclude Include="DialogueText.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="LevelSys.h" />

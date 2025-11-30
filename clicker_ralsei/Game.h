@@ -6,7 +6,8 @@
 #include "Menu.h"
 #include "Tree.h"
 #include "mini_game.h"
-#include "AssetManeger.h"
+#include "AssetManager.h"
+#include "Button.h"
 
 static const float VIEW_WIDTH = 800;
 static const float VIEW_HEIGHT = 600;
@@ -14,22 +15,16 @@ static const float VIEW_HEIGHT = 600;
 class Game {
 private:
 	sf::Sprite center;
-	sf::Texture center_tex;
 	MiniGame game_ev;
 private:
 	//window and ralsei
 	sf::RenderWindow window;
 	sf::Sprite ralsei;
-	sf::Texture ralsei_texture;
-	
 
 	//main visual part
 	sf::View main_view; 
 	sf::Sprite background;
-	sf::Texture background_tex;
-	//sf::Texture skins_tex[3];
-	//sf::Texture skins_lock_tex[3];
-	
+
 	//player
 	Player player;
 	Animation anim;
@@ -38,14 +33,13 @@ private:
 	//skins
 	std::map<int, sf::Texture> skins_tex_orig;     
 	std::map<int, sf::Texture> skins_tex_button;
+	Button butt_skin;
 	sf::RectangleShape skins[3];
 	
 
 	//heart(lvl objects)
 	sf::Sprite heartLvl;
 	sf::Sprite heartEmpty;
-	sf::Texture heart_texture;
-	sf::Texture heartEmpty_texture;
 	sf::IntRect rect_heart; // for animation of filling up
 
 	//menu
