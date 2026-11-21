@@ -182,7 +182,7 @@ void Game::toggleFullScreen()
 	if (FULLSCREEN) {
 		window.create(
 			sf::VideoMode::getDesktopMode(),
-			"PRTP",
+			"CLICK",
 			sf::Style::Fullscreen
 		);
 
@@ -190,7 +190,7 @@ void Game::toggleFullScreen()
 	else if (!FULLSCREEN) {
 		window.create(
 			sf::VideoMode(VIEW_WIDTH, VIEW_HEIGHT),
-			"PRTP",
+			"CLICK",
 			sf::Style::Titlebar | sf::Style::Close
 		);
 	}
