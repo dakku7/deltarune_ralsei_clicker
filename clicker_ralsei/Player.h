@@ -1,11 +1,16 @@
 #pragma once
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include "Button.h"
+
 
 class Game;
+class Clickable;
+
 
 class Player {
 public:
+	AssetManager* ass_mgr;
 //-----TEXT-----------
 	sf::Text count_text;
 	sf::Text level_text;
@@ -37,6 +42,7 @@ private:
 public:
 	Player()
 		: clickCount(0) { 
+
 		click_count_font.loadFromFile("Data\\sans.otf");
 		level_text.setFont(click_count_font);
 		count_text.setFont(click_count_font);
@@ -84,4 +90,11 @@ public:
 	void reset(std::map<int, sf::Texture>& skins_tex_orig, std::map<int, sf::Texture>& skins_tex_button, sf::RectangleShape* skins);
 	~Player() {}
 
-};
+	//new 
+	bool click(Clickable& target, sf::RenderWindow& window, const sf::Event& ev);
+	void addClick();
+	void reset();
+};	
+
+
+

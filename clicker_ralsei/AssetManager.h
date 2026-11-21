@@ -17,8 +17,11 @@ enum class TextureID {
 
 	//locked frames
 	Ralsei_skin_1_locked,
+	Ralsei_skin_1_locked_light,
 	Ralsei_skin_2_locked,
+	Ralsei_skin_2_locked_light,
 	Ralsei_skin_3_locked,
+	Ralsei_skin_3_locked_light,
 
 
 	//unlocked frames
@@ -55,12 +58,14 @@ enum class TextureID {
 	Tree_19,
 	Tree_20,
 
+	//ralsei anim
+	RalseiFireBall
 };
 
 class AssetManager {
 public:
 	bool loadTexture(TextureID id);
-	const sf::Texture& getTexture(TextureID id);
+	sf::Texture& getTexture(TextureID id);
 private:
 	std::map<TextureID, std::unique_ptr<sf::Texture>> textures;
 

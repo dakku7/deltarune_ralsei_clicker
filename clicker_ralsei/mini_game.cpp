@@ -27,6 +27,14 @@ MiniGame::MiniGame()
 void MiniGame::run() 
 {
 	isGameRunning = true;
+	while (isGameRunning) {
+		if (!isGameRunning) {		
+			return;
+		}
+
+		//playerController();
+	}
+
 }
 
 void MiniGame::stop()

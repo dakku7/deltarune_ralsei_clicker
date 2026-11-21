@@ -45,8 +45,8 @@ void Animation::startClicked(sf::Sprite& ralsei)
 		 Bangle_ralsei = ralsei.getRotation();
 
 		 meow.play();
-		 ralsei.setScale(ralsei.getScale().x * 1.05f, ralsei.getScale().x * 1.05f);
-		 ralsei.setRotation(2.0f);
+		 ralsei.setScale(Bscale_ralsei_x * 1.05f, Bscale_ralsei_y * 1.05f);
+		 ralsei.setRotation(Bangle_ralsei + 2.0f);
 		 clock.restart();
 		 timeIsActive = true;
 	 }
@@ -54,19 +54,19 @@ void Animation::startClicked(sf::Sprite& ralsei)
 
  void Animation::updateModels(sf::Sprite& ralsei)
  {
-	
+	 if (!timeIsActive) return;
 
-	 if (timeIsActive && clock.getElapsedTime().asSeconds() >= 0.05f) {
-		 ralsei.setScale(ralsei.getScale().x * 1.05f, ralsei.getScale().x * 1.05f);
+	 float time = clock.getElapsedTime().asSeconds();
 
-	 }
-
-	 if (timeIsActive && clock.getElapsedTime().asSeconds() >= 0.1f) {
+	 if (time >= 0.1f) {
 		 ralsei.setScale(Bscale_ralsei_x, Bscale_ralsei_y);
 		 ralsei.setRotation(Bangle_ralsei);
 		 timeIsActive = false;
 		 
 	 }
+	 else if (time >= 0.05f) {
+		 ralsei.setScale(Bscale_ralsei_x * 1.10f, Bscale_ralsei_y*1.10f);
+	}
  }
 
 
@@ -137,12 +137,19 @@ void Animation::startClicked(sf::Sprite& ralsei)
 		 sf::Mouse::setPosition(sf::Vector2i(400, 300), window); // reset position 
 		 return;
 	 }
-	
-	 window.setMouseCursorVisible(false); // hide cursor
-	 sf::Mouse::setPosition(sf::Vector2i(0, 0), window); // reset position 
-	 overlay.setSize((sf::Vector2f)window.getSize());
+	 const sf::View& view_ = window.getView();
+	 sf::Vector2f view_size = view_.getSize();
+	 sf::Vector2f view_center = view_.getCenter();
 
-	 levelup.setPosition(window.getSize().x / 2.f, window.getSize().y / 2.f);
+	 window.setMouseCursorVisible(false); // hide cursor
+
+	 sf::Mouse::setPosition(sf::Vector2i(0, 0), window); // reset position 
+	 overlay.setSize(view_size);
+	 overlay.setOrigin(view_size / 2.f);
+	 overlay.setPosition(view_center);
+
+
+	 levelup.setPosition(view_center);
 
 	 window.draw(overlay);
 	 window.draw(levelup);

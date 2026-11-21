@@ -1,12 +1,14 @@
 #include "Game.h"
+#include "Ralsei.h"
+#include "Heart.h"
 //#define DEBUG
 
 Game::Game()
 	: window(sf::VideoMode({ 800, 600 }), "CLICK", sf::Style::Default),
 	main_view(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(VIEW_HEIGHT, VIEW_WIDTH)),
-	butt_skin(TextureID::Ralsei_skin_1_frame, TextureID::Ralsei_skin_1_lighted, &assets)
+	game_scene(assets, player)
 {
-
+	handleResize();
 	loadTextures();
 	initSprites();
 #ifdef DEBUG
@@ -19,7 +21,7 @@ Game::Game()
 #ifdef DEBUG
 	std::cout << "Booleans skins: off: " + std::to_string(player.getRalseiSkinstatus(1)) + ", dino: " + std::to_string(player.getRalseiSkinstatus(2)) + ", rock: " + std::to_string(player.getRalseiSkinstatus(3)) + '\n';
 #endif // TEST
-
+	
 	//backup.setTextures(player, ralsei, background, ralsei_texture, background_tex, skins_tex_orig, skins_tex_button, skins, heartLvl, heart_texture, heartEmpty, heartEmpty_texture, menu_guide);
 	
 	
@@ -34,7 +36,7 @@ Game::Game()
 		static_cast<float>(window.getSize().y) / 2.f
 	);
 	ralseiGroundOffset =200;
-	setPositionRalsei();
+
 	theme.openFromFile("Audio\\lantern.wav");
 	theme.setLoop(true);
 	theme.setVolume(20);
@@ -59,6 +61,10 @@ bool Game::run()
 		backup.loadupFiles(player);
 	}
 	else return false;
+
+	ResizeView(window, main_view);
+	
+	
 	theme.play();
 
 	sf::FloatRect heartBounds = heartEmpty.getLocalBounds();
@@ -86,27 +92,15 @@ bool Game::run()
 	window.setFramerateLimit(60);
 	while (window.isOpen())
 	{
+		float dt = clock.restart().asSeconds();
 		sf::Event event;
 		while (window.pollEvent(event)) {
 			if (game_ev.isOpen()) {
 				continue;
 			}
+			handleEvents(event);
+		}	
 
-			switch (event.type)
-			{
-
-			case sf::Event::Closed:
-				window.close();
-				break;
-			case sf::Event::Resized:
-				checkWindowSize();
-				applyIntegerScaling();
-				break;
-			case sf::Event::MouseButtonPressed:
-				if (player.click(ralsei, window, event, main_view)) {
-					anim.startClicked(ralsei);
-				}
-				
 				for (int i = 0; i < 3; i++) {
 					player.click(ralsei, skins[i], window, event, main_view, i + 1, skins_tex_orig, i);
 				}
@@ -193,14 +187,8 @@ bool Game::run()
 		}
 		butt_skin.buttonHover(player, window);
 
-		anim.fogUpdate();
-		anim.sparkleSpawn();
-		anim.sparkleUpdate();
-		anim.lightSpawn();
-		anim.lightUpdate();
-		first_tree.anim();
-		second_tree.anim();
-
+	//new 
+		update(dt, &window);
 		render();
 	}
 
@@ -208,9 +196,11 @@ bool Game::run()
 	return false;
 }
 
-
+//loop
 void Game::render()
 {
+	float dt = clock.restart().asSeconds();
+
 	background.setPosition(sf::Vector2f(0, 0));
 
 	main_view.setCenter(center.getPosition());
@@ -224,7 +214,7 @@ void Game::render()
 //	anim.lightDraw(window);
 
 //main char
-	window.draw(ralsei);
+	game_scene.render(&window);
 	
 	ResizeView(window, main_view);
 //window.setView(window.getDefaultView());
@@ -232,19 +222,14 @@ void Game::render()
 
 //obj
 	player.count_text.setCharacterSize((window.getSize().x / window.getSize().y) * 24);
-	window.draw(heartEmpty);
-	window.draw(heartLvl);
-	updateHeart(player);
+	window.draw(player.count_text);
 
 //text
 	window.draw(player.count_text);
 	window.draw(player.level_text);
 	window.draw(menu_guide);
 	
-	for (int i = 0; i < 3; i++)
-	{
-		window.draw(skins[i]);
-	}
+	
 	if (anim.timeAnim) {
 		anim.draw(window);
 	}
@@ -258,28 +243,48 @@ void Game::render()
 	window.display();
 }
 
-void Game::setPositionRalsei()
+void Game::update(float dt, sf::RenderWindow* window)
 {
-    // выставл€ем origin у текущей текстуры ralsei на bottom-center
-    if (ralsei.getTexture()) {
-        const sf::Texture* tex = ralsei.getTexture();
-        ralsei.setOrigin(static_cast<float>(tex->getSize().x) / 2.f, static_cast<float>(tex->getSize().y) );
-    }
 
-    // позици€ "дна" равна позиции center плюс дополнительный оффсет (если нужен)
-    sf::Vector2f centerPos = center.getPosition();
-    float groundY = centerPos.y + ralseiGroundOffset;
+	game_scene.update(dt, *window);
 
-    // позиционируем ralsei так, чтобы его нижн€€ точка оказалась на groundY
-    ralsei.setPosition(centerPos.x, groundY);
 }
 
-sf::Vector2f Game::GetRalseiPosition() 
+//textrs
+void Game::initSprites()
 {
-	return ralsei.getPosition();
-	 
+	center.setTexture(assets.getTexture(TextureID::center_tex));
+	background.setTexture(assets.getTexture(TextureID::Background));
+
+	game_scene.init(window.getSize());
 }
 
+void Game::loadTextures()
+{
+	assets.loadTexture(TextureID::Ralsei_Main);
+	assets.loadTexture(TextureID::Ralsei_skin_1);
+	assets.loadTexture(TextureID::Ralsei_skin_1_locked);
+	assets.loadTexture(TextureID::Ralsei_skin_1_frame);
+	assets.loadTexture(TextureID::Ralsei_skin_1_locked_light);
+	assets.loadTexture(TextureID::Ralsei_skin_2);
+	assets.loadTexture(TextureID::Ralsei_skin_2_locked);
+	assets.loadTexture(TextureID::Ralsei_skin_2_locked_light);
+	assets.loadTexture(TextureID::Ralsei_skin_2_frame);
+	assets.loadTexture(TextureID::Ralsei_skin_3);
+	assets.loadTexture(TextureID::Ralsei_skin_3_frame);
+	assets.loadTexture(TextureID::Ralsei_skin_3_locked);
+	assets.loadTexture(TextureID::Ralsei_skin_3_locked_light);
+
+	assets.loadTexture(TextureID::Background);
+	assets.loadTexture(TextureID::Heart);
+	assets.loadTexture(TextureID::Heart_empty);
+	assets.loadTexture(TextureID::center_tex);
+
+}
+
+
+
+//fullscreen
 void Game::ResizeView(const sf::RenderWindow& window, sf::View& view)
 {
 	float aspectRatio = static_cast<float>(window.getSize().x) /
@@ -289,62 +294,91 @@ void Game::ResizeView(const sf::RenderWindow& window, sf::View& view)
 	view.setSize(VIEW_HEIGHT * aspectRatio, VIEW_HEIGHT);
 }
 
-void Game::checkWindowSize()
+void Game::toggleFullScreen()
 {
-	if (window.getSize().x != 800) {
-		window.setSize(sf::Vector2u(800, window.getSize().y));
+	FULLSCREEN = !FULLSCREEN;
+	window.close();
+
+	if (FULLSCREEN) {
+		window.create(
+			sf::VideoMode::getDesktopMode(),
+			"CLICK",
+			sf::Style::Fullscreen
+		);
+
 	}
-	if (window.getSize().y != 600) {
-		window.setSize(sf::Vector2u(window.getSize().x, 600));
-
+	else if (!FULLSCREEN) {
+		window.create(
+			sf::VideoMode(VIEW_WIDTH, VIEW_HEIGHT),
+			"CLICK",
+			sf::Style::Titlebar | sf::Style::Close
+		);
 	}
+
+	window.setFramerateLimit(60);
+	handleResize();
 }
 
-void Game::ButtonHover(sf::RectangleShape* skins, int count, sf::RenderWindow& window)
+
+//handlers
+void Game::handleResize()
 {
-	
+	sf::Vector2u windowSize = window.getSize();
+
+	if (windowSize.x == 0 || windowSize.y == 0) return;
+
+	main_view.setSize(800.f, 600.f);
+	main_view.setCenter(400.f, 300.f);
+
+	float windowRatio = static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y);
+	float gameRatio = 800.f / 600.f; 
+
+	float sizeX = 1.f;
+	float sizeY = 1.f;
+	float posX = 0.f;
+	float posY = 0.f;
+
+	if (windowRatio > gameRatio)
+	{
+		sizeX = gameRatio / windowRatio;
+		posX = (1.f - sizeX) / 2.f;
+	}
+	else
+	{
+		sizeY = windowRatio / gameRatio;
+		posY = (1.f - sizeY) / 2.f;
+	}
+
+	main_view.setViewport(sf::FloatRect(posX, posY, sizeX, sizeY));
+	window.setView(main_view);
+	window.setFramerateLimit(60);
 }
 
-void Game::updateHeart(Player& player)
+void Game::handleEvents(sf::Event& ev)
 {
-	float fillPercent = static_cast<float>(player.Get_clickCount()) / player.click_equivalent_level(player.level);
-	sf::Vector2u textureSize = heartLvl.getTexture()->getSize();
-	fillPercent = std::clamp(fillPercent, 0.f, 1.f);
-
-	int filledHeight = static_cast<int>(textureSize.y * fillPercent);
-
-	sf::IntRect fillRectangle(0, textureSize.y - filledHeight, textureSize.x, filledHeight);
-
-	
-	heartLvl.setTextureRect(fillRectangle);
-	heartLvl.setOrigin(textureSize.x / 2.f, textureSize.y); // точка прив€зки низ спрайта
-	heartLvl.setPosition(heartEmpty.getPosition().x, heartEmpty.getPosition().y + assets.getTexture(TextureID::Heart_empty).getSize().y / 2 + (assets.getTexture(TextureID::Heart_empty).getSize().y - filledHeight));
-
-}
-
-void Game::centerLvl(sf::Text& level_text)
-{
-	sf::FloatRect textRect = player.level_text.getLocalBounds();
-	player.level_text.setOrigin(textRect.left + textRect.width / 2.f,
-		textRect.top + textRect.height / 2.f);
-	player.level_text.setPosition(heartEmpty.getPosition());
-}
-
-void Game::applyIntegerScaling()
-{
+	switch (ev.type)
+	{
 	int screenW = window.getSize().x;
 	int screenH = window.getSize().y;
 
-	float scaleX = (float)screenW / 800;
-	float scaleY = (float)screenH / 600;
+	case sf::Event::Closed:
+		window.close();
+		break;
 
-	float finalScale = std::floor(std::min(scaleX, scaleY));
+	case sf::Event::MouseButtonPressed:
+		handleClick(ev);
+		break;
 
-	float finalWidth = 800 * finalScale;
-	float finalHeight = 600 * finalScale;
+		break;
+	case sf::Event::KeyPressed:
+		if (ev.key.code == sf::Keyboard::Escape) {
+			window.close();
+		}
 
-	float offsetX = (screenW - finalWidth) / 2.f;
-	float offsetY = (screenH - finalHeight) / 2.f;
+		if (ev.key.code == sf::Keyboard::C && !isKeyPressed && !levelUpState) {
+			isKeyPressed = true;
+			player.Add_clickCount(ev);
+			handleClick(ev);
 
 	main_view.setViewport(sf::FloatRect(
 		offsetX / screenW,
@@ -352,65 +386,58 @@ void Game::applyIntegerScaling()
 		finalWidth / screenW,
 		finalHeight / screenH
 	));
-}
+		}
 
-void Game::drawFullScreen()
-{
-	isFullscreen = !isFullscreen;
+		if (ev.key.code == sf::Keyboard::Z) {
+			menu_.draw(player, window);
+		}
 
-	window.close();
+		if (ev.key.code == sf::Keyboard::Num0) {
+			player.Add_clickCount(999);
 
-	if (isFullscreen)
-	{
-		
-		window.create(
-			sf::VideoMode::getDesktopMode(),
-			"CLICK",
-			sf::Style::None // !!! ключ !!
-		);
+			player.updateText(player.count_text, player.Get_clickCount());
+		}
+
+		if (ev.key.code == sf::Keyboard::F1) {
+			player.reset();
+			game_scene.resetSkin();
+			backup.backupFiles(player);
+		}
+
+		if (ev.key.code == sf::Keyboard::Num9) {
+			game_scene.resetSkin();
+
+		}
+
+		if (ev.key.code == sf::Keyboard::F2) {
+			game_ev.run();
+		}
+
+		if (ev.key.code == sf::Keyboard::Enter && ev.key.alt)
+		{
+			toggleFullScreen();
+		}
+
+		break;
+	case sf::Event::KeyReleased:
+		if (ev.key.code == sf::Keyboard::C) {
+			isKeyPressed = false;
+		}
+		break;
+	default:
+		break;
 	}
-	else
-	{
-		window.create(
-			sf::VideoMode(800, 600),
-			"CLICK",
-			sf::Style::Default
-		);
+}
+
+void Game::handleClick(sf::Event& ev)
+{
+	sf::Vector2i mouse_pos = sf::Vector2i(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y);
+	sf::Vector2f world_pos = window.mapPixelToCoords(mouse_pos, main_view);
+
+	if (world_pos.x < 0 || world_pos.x > 800 || world_pos.y < 0 || world_pos.y > 600) {
+		return;
 	}
-
-	window.setFramerateLimit(60);
-
-	applyIntegerScaling();
-}
-
-void Game::initSprites()
-{
-	center.setTexture(assets.getTexture(TextureID::center_tex));
-	ralsei.setTexture(assets.getTexture(TextureID::Ralsei_Main));
-	background.setTexture(assets.getTexture(TextureID::Background));
-	heartLvl.setTexture(assets.getTexture(TextureID::Heart));
-	heartEmpty.setTexture(assets.getTexture(TextureID::Heart_empty));
-	butt_skin.initSprite();
-}
-
-void Game::loadTextures()
-{
-	assets.loadTexture(TextureID::Ralsei_Main);
-	assets.loadTexture(TextureID::Ralsei_skin_1);
-	assets.loadTexture(TextureID::Ralsei_skin_1_locked);
-	assets.loadTexture(TextureID::Ralsei_skin_1_frame);
-	assets.loadTexture(TextureID::Ralsei_skin_2);
-	assets.loadTexture(TextureID::Ralsei_skin_2_locked);
-	assets.loadTexture(TextureID::Ralsei_skin_2_frame);
-	assets.loadTexture(TextureID::Ralsei_skin_3);
-	assets.loadTexture(TextureID::Ralsei_skin_3_frame);
-	assets.loadTexture(TextureID::Ralsei_skin_3_locked);
-
-	assets.loadTexture(TextureID::Background);
-	assets.loadTexture(TextureID::Heart);
-	assets.loadTexture(TextureID::Heart_empty);
-	assets.loadTexture(TextureID::center_tex);
-
+	game_scene.handleClick(world_pos, player, window, ev);
 }
 
 

@@ -53,6 +53,9 @@ private:
 
 	sf::Music snd_levelup;
 public:
+
+
+
 	Animation();
 	void startLevelUp(int level, bool& secureClick);
 	void updateLevelUp(sf::RenderWindow& window, bool& secureClick);

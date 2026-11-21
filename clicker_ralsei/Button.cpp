@@ -1,10 +1,14 @@
 #include "Button.h"
 
-Button::Button(TextureID button_tex, TextureID button_tex_light, AssetManager* asset)
+Button::Button(ClickType type,
+	TextureID button_tex, TextureID button_tex_light,
+	TextureID button_lock_tex, TextureID button_lock_light_tex,
+	RalseiSkins skin_tex, AssetManager* asset)
+	: Clickable(type), ass_mgr(asset),
+	id(button_tex), id_light(button_tex_light), 
+	id_lock(button_lock_tex), id_lock_light(button_lock_light_tex), skin(skin_tex)
 {
-	ass_mgr = asset;
-	this->id = button_tex;
-	this->id_light = button_tex_light;
+	initSprite();
 }
 
 void Button::initSprite()
@@ -15,21 +19,56 @@ void Button::initSprite()
 	button.setTexture(ass_mgr->getTexture(id));
 }
 
-void Button::buttonHover(Player& p, sf::RenderWindow& window)
+void Button::setHovered(bool exprs)
 {
-		sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-
-		float x1 = button.getPosition().x;
-		float y1 = button.getPosition().y;
-		float x2 = x1 + button.getTexture()->getSize().x;
-		float y2 = y1 + button.getTexture()->getSize().y;
-
-		if ((mousePos.x >= x1) && (mousePos.x <= x2) && (mousePos.y >= y1) && (mousePos.y <= y2)) {
-			button.setTexture(ass_mgr->getTexture(id_light));
+	isHovered = exprs;
+	if (isHovered) {
+		if (isEnabled) {
+			button.setTexture(ass_mgr->getTexture(id_lock_light));
 		}
-		else {
-			button.setTexture(ass_mgr->getTexture(id));
-		}
+		else button.setTexture(ass_mgr->getTexture(id_light));
+	}
+	else {
+		if (isEnabled) {
+			button.setTexture(ass_mgr->getTexture(id_lock));
+		} 
+		else button.setTexture(ass_mgr->getTexture(id));
+	}
+}
+
+void Button::setEnabled(bool exprs)
+{
+	isEnabled = exprs;
+}
+
+void Button::setCallback(Callback func)
+{
+	callback = func;
+}
+
+bool Button::contains(sf::Vector2f point) const
+{
+	return this->button.getGlobalBounds().contains(point);
+}
+
+void Button::clicked()
+{
+	if (isEnabled) {
+		return;
+	}
+	if (callback) {
+		callback();
+	}
+}
+
+
+void Button::update(float dt)
+{
+}
+
+void Button::render(sf::RenderTarget* target)
+{
+	target->draw(this->button);
 }
 
 sf::Sprite& Button::getSprite()
@@ -37,7 +76,17 @@ sf::Sprite& Button::getSprite()
 	return button;
 }
 
-void Button::setPosition(sf::Vector2f& pos)
+RalseiSkins Button::getSkin()
+{
+	return skin;
+}
+
+void Button::setPosition(const sf::Vector2f& pos)
 {
 	button.setPosition(pos);
+}
+
+sf::Vector2f Button::getPosition()
+{
+	return button.getPosition();
 }

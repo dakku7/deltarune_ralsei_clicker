@@ -1,72 +1,26 @@
 #include "Player.h"
 #include "Game.h"
+#include "Clickable.h"
 
-void Player::reset(std::map<int, sf::Texture>& skins_tex_orig, std::map<int, sf::Texture>& skins_tex_button, sf::RectangleShape* skins) {
-	 clickCount = 0;
-	 clickPower = 1;
-	 level = 0;
-	 ralseiSuitDino = false;
-	 ralseiSuitRock = false;
-	 ralseiSuitOff = false;
-	 currentSkinIndex = 0;
-	
-	 updateSkins(skins_tex_orig, skins_tex_button, skins);
-	 updateText(count_text, clickCount);
-	 updateText(level_text, level);
-}
-
-bool Player::click(sf::Sprite& ralsei, sf::RenderWindow& window, const sf::Event& event, sf::View main_view)
+bool Player::click(Clickable& target, sf::RenderWindow& window, const sf::Event& ev)
 {
-	if (event.mouseButton.button == sf::Mouse::Button::Left) {
+	if (ev.mouseButton.button == sf::Mouse::Button::Left) {
 		auto mouse_pos = sf::Mouse::getPosition(window);
-		auto translated_pos = window.mapPixelToCoords(mouse_pos, main_view); 
-		if (ralsei.getGlobalBounds().contains(translated_pos)) {
-			// Rectangle-contains-point check
-			int click_buf = 1 * clickPower;
-			clickCount += click_buf;
-			updateText(count_text, clickCount);
+		sf::Vector2f mouse_pos_f = sf::Vector2f(mouse_pos.x, mouse_pos.y);
+		if (target.contains(mouse_pos_f)) {
 			return true;
 		}
 		else return false;
 		
 	}
-	else return false;
+	return false;
 }
 
-
-
-bool Player::click(sf::Sprite& ralsei, sf::RectangleShape& button, sf::RenderWindow& window, const sf::Event& event,sf::View& main_view, int skinIndex, std::map<int, sf::Texture>& skinTexturesOrig, int& i)
+void Player::addClick()
 {
-	if (event.mouseButton.button != sf::Mouse::Left) return false;
-
-	sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-	sf::Vector2f translatedPos = window.mapPixelToCoords(mousePos, main_view);
-
-	if (!button.getGlobalBounds().contains(translatedPos)) return false;
-	if (!getRalseiSkinstatus(skinIndex)) return false;
-
-	// вычислим мировую координату "дна" (нижней границы) текущего спрайта с учЄтом масштаба
-	sf::FloatRect prevBounds = ralsei.getGlobalBounds();
-	float groundY = prevBounds.top + prevBounds.height;
-
-	// сохраним текущую X-позицию и масштаб
-	float posX = ralsei.getPosition().x;
-	sf::Vector2f scale = ralsei.getScale();
-
-	// установим новую текстуру и сбросим rect, чтобы не осталось "кусочков" старого rect
-	ralsei.setTexture(skinTexturesOrig[skinIndex], true);
-	const sf::Texture& newTex = skinTexturesOrig[skinIndex];
-
-	// установим origin по центру (как в setPositionRalsei) и поставим позицию так,
-	// чтобы нижн€€ граница оставалась на groundY
-	float newW = static_cast<float>(newTex.getSize().x);
-	float newH = static_cast<float>(newTex.getSize().y);
-
-	ralsei.setOrigin(newW / 2.f, newH / 2.f);
-	ralsei.setPosition(posX, groundY - (newH / 2.f) * scale.y);
-
-	currentSkinIndex = skinIndex;
-	return true;
+	int click_buf = 1 * clickPower;
+	clickCount += click_buf;
+	updateText(count_text, clickCount);
 }
 
 
@@ -119,7 +73,7 @@ void Player::updateSkins(std::map<int, sf::Texture>& skins_tex_orig, std::map<in
 			std::cerr << "Error orig text " << skinFile << std::endl;
 		}
 
-		// грузим кнопку (открыта€ или закрыта€)
+	
 		if (this->getRalseiSkinstatus(i)) {
 			skins_tex_button[i].loadFromFile(skinFile);
 		}
@@ -285,3 +239,19 @@ void Player::levelCheck(int& level_F)
 		break;
 	}
 }
+
+
+void Player::reset() {
+	clickCount = 0;
+	clickPower = 1;
+	level = 0;
+	ralseiSuitDino = false;
+	ralseiSuitRock = false;
+	ralseiSuitOff = false;
+	currentSkinIndex = 0;
+
+	updateText(count_text, clickCount);
+	updateText(level_text, level);
+}
+
+

@@ -1,11 +1,10 @@
 ﻿#include "Tree.h"
 
-Tree::Tree()
+Tree::Tree(AssetManager& manager)
+    : ass_mgr(manager)
 {
-	for (int i = 0; i < 20; i++)
-	{
-		tree_tex[i].loadFromFile("Textures\\Chapter1\\Trees\\tree__" + std::to_string(i + 1) + ".png");
-    }
+    initSprites(ass_mgr);
+    initAnimations();
 
 	tree.setTexture(tree_tex[0]);
     tree.setOrigin(tree.getGlobalBounds().width / 2, tree.getGlobalBounds().height / 2);
@@ -14,31 +13,40 @@ Tree::Tree()
 
 }
 
-void Tree::anim()
+void Tree::initSprites(AssetManager& asset_mgr)
 {
-	float dt = clock.getElapsedTime().asSeconds();
-    if (dt >= frameTime)
+    for (int i = 0; i < 20; i++)
     {
-        currentFrame++;
-
-        if (currentFrame >= 20)
-            currentFrame = 0;
-
-        tree.setTexture(tree_tex[currentFrame]);
-
-        clock.restart();
+        TextureID id = static_cast<TextureID>(static_cast<int>(TextureID::Tree_1) + i);
+        asset_mgr.loadTexture(id);
+        frames_tex.push_back(&asset_mgr.getTexture(id));
     }
-
 }
 
-void Tree::draw(sf::RenderWindow& window) 
+void Tree::initAnimations()
 {
-    window.draw(tree);
+    idleAnimation = std::make_unique<Anim>(&tree, frames_tex, frameTime);
 }
 
-void Tree::setTree(sf::Vector2f pos)
+void Tree::update(float dt) {
+    if (idleAnimation) {
+        idleAnimation->update(dt);
+    }
+}
+
+
+void Tree::render(sf::RenderTarget* target)
+{
+    target->draw(this->tree);
+}
+
+void Tree::setPosition(sf::Vector2f pos)
 {
     tree.setPosition(pos);
+}
+
+sf::Vector2f Tree::getPosition() {
+    return tree.getPosition();
 }
 
 Tree::~Tree()

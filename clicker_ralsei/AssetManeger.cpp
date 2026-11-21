@@ -33,17 +33,23 @@ std::string AssetManager::getPath(TextureID id)
     case TextureID::Ralsei_skin_1:    return "Textures\\ralss1.png";
     case TextureID::Ralsei_skin_2:    return "Textures\\ralss2.png";
     case TextureID::Ralsei_skin_3:    return "Textures\\ralss3.png";
+    case TextureID::RalseiFireBall:   return "Textures\\ralsei_fireball.png";
 
         // -------- locked frames --------
     case TextureID::Ralsei_skin_1_locked: return "Textures\\skin1lock.png";
+    case TextureID::Ralsei_skin_1_locked_light: return "Textures\\skin1lock_lighted.png";
     case TextureID::Ralsei_skin_2_locked: return "Textures\\skin2lock.png";
+    case TextureID::Ralsei_skin_2_locked_light: return "Textures\\skin2lock_lighted.png";
     case TextureID::Ralsei_skin_3_locked: return "Textures\\skin3lock.png";
+    case TextureID::Ralsei_skin_3_locked_light: return "Textures\\skin3lock_lighted.png";
 
         // -------- unlocked button frames --------
     case TextureID::Ralsei_skin_1_frame: return "Textures\\skin_1_frame.png";
     case TextureID::Ralsei_skin_1_lighted: return "Textures\\skin_1_lighted.png";
-    case TextureID::Ralsei_skin_2_frame: return "Textures\\skin2.png";
-    case TextureID::Ralsei_skin_3_frame: return "Textures\\skin3.png";
+    case TextureID::Ralsei_skin_2_frame: return "Textures\\skin_2_frame.png";
+    case TextureID::Ralsei_skin_2_lighted: return "Textures\\skin_2_lighted.png";
+    case TextureID::Ralsei_skin_3_frame: return "Textures\\skin_3_frame.png";
+    case TextureID::Ralsei_skin_3_lighted: return "Textures\\skin_3_lighted.png";
 
         // -------- heart --------
     case TextureID::Heart:       return "Textures\\heart.png";
@@ -74,7 +80,7 @@ std::string AssetManager::getPath(TextureID id)
     return "";
 }
 
-const sf::Texture& AssetManager::getTexture(TextureID id)
+sf::Texture& AssetManager::getTexture(TextureID id)
 {
     auto it = textures.find(id);
     if (it == textures.end()) {

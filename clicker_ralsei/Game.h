@@ -4,13 +4,18 @@
 #include "Animation.h"
 #include "Backup.h"
 #include "Menu.h"
-#include "Tree.h"
+
 #include "mini_game.h"
 #include "AssetManager.h"
 #include "Button.h"
 
-static const float VIEW_WIDTH = 800;
-static const float VIEW_HEIGHT = 600;
+
+//new
+#include "Clickable.h"
+#include "Scene.h"
+#include "Constants.h"
+
+
 
 class Game {
 private:
@@ -19,7 +24,7 @@ private:
 private:
 	//window and ralsei
 	sf::RenderWindow window;
-	sf::Sprite ralsei;
+	bool fullscreen = false;
 
 	//main visual part
 	sf::View main_view; 
@@ -29,7 +34,7 @@ private:
 	Player player;
 	Animation anim;
 	Backup backup;
-	
+
 	//skins
 	std::map<int, sf::Texture> skins_tex_orig;     
 	std::map<int, sf::Texture> skins_tex_button;
@@ -48,7 +53,7 @@ private:
 	bool isKeyPressed = false;
 	bool levelUpState = false;
 	bool isFullscreen = false;
-	
+
 	Tree first_tree;
 	Tree second_tree;
 
@@ -56,7 +61,10 @@ private:
 	sf::Music theme;
 	float ralseiGroundOffset = 0.f;
 
+//new part
 	AssetManager assets;
+	sf::Clock clock;
+	Scene game_scene;
 public:
 
 	Game();
@@ -77,5 +85,11 @@ public:
 	void initSprites();
 	void loadTextures();
 
+//new 
+	void update(float dt, sf::RenderWindow* window);
+	void handleClick(sf::Event& ev);
+	void toggleFullScreen();
+	void handleResize();
+	void handleEvents(sf::Event& ev);
 	~Game();
 };

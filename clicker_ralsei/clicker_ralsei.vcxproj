@@ -136,10 +136,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Animation+.cpp" />
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="AssetManeger.cpp" />
     <ClCompile Include="Backup.cpp" />
     <ClCompile Include="Button.cpp" />
+    <ClCompile Include="Heart.cpp" />
     <ClCompile Include="LevelSys.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Game.cpp" />
@@ -147,20 +149,32 @@
     <ClCompile Include="mini_game.cpp" />
     <ClCompile Include="Options.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Ralsei.cpp" />
+    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Text.cpp" />
     <ClCompile Include="Tree.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Animation+.h" />
     <ClInclude Include="Animation.h" />
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="Backup.h" />
     <ClInclude Include="Button.h" />
+    <ClInclude Include="Clickable.h" />
+    <ClInclude Include="Constants.h" />
     <ClInclude Include="DialogueText.h" />
+    <ClInclude Include="Entity.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="Heart.h" />
     <ClInclude Include="LevelSys.h" />
     <ClInclude Include="Menu.h" />
     <ClInclude Include="mini_game.h" />
     <ClInclude Include="Options.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Ralsei.h" />
+    <ClInclude Include="RalseiSkins.h" />
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="Text.h" />
     <ClInclude Include="Tree.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
