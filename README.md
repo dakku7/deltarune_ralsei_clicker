@@ -40,7 +40,7 @@ Built as a personal learning project to practice OOP, memory management, and 2D 
 
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/your-username/clicker_ralsei.git](https://github.com/your-username/clicker_ralsei.git)
+   git clone https://github.com/dakku7/deltarune_ralsei_clicker.git
 2. Download SFML 2.6.2 matching your Visual Studio compiler (x64) from the official website.
 3. Open clicker_ralsei.vcxproj in Visual Studio and set the SFML include and lib paths in the project properties.
 4. Copy the required SFML .dll files into the build directory and make sure the Textures, Audio, and Data folders are in the working directory.
