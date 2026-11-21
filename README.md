@@ -6,7 +6,6 @@ Built as a personal learning project to practice OOP, memory management, and 2D 
 <!-- ![Gameplay screenshot](docs/screenshot.png) -->
 
 ## Gameplay:
-![Gameplay](./screen.gif)
 ![til](./screen/g.gif)
 ![til](./screen/settings.gif)
 ![til](./screen/skins.gif)
