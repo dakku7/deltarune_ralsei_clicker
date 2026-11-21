@@ -10,6 +10,11 @@ Built as a personal learning project to practice OOP, memory management, and 2D 
 ![til](./screen/settings.gif)
 ![til](./screen/skins.gif)
 
+##Music:
+Music on background made by **Alca Animusic on Piano**
+Link: https://www.youtube.com/watch?v=iLAqGJpS9Tw
+
+
 
 ## Features
 
